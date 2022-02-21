@@ -2,6 +2,7 @@
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -20,16 +21,19 @@ internal class NuGetClient
         repository = Repository.Factory.GetCoreV3(source);
         cache = new SourceCacheContext();
         downloadContext = new PackageDownloadContext(cache);
+        Console.WriteLine("Constructed NuGet");
     }
 
     public async Task<IEnumerable<NuGetVersion>> GetPackageVersions(string packageId)
     {
         FindPackageByIdResource resource = await repository.GetResourceAsync<FindPackageByIdResource>();
-        return await resource.GetAllVersionsAsync(
+        var result = await resource.GetAllVersionsAsync(
             packageId,
             cache,
             logger,
             cancellationToken);
+        Console.WriteLine($"Loaded {packageId}");
+        return result;
     }
 
     internal async Task<string> DownloadPackage(string packageId, NuGetVersion version)
@@ -41,6 +45,8 @@ internal class NuGetClient
              Path.GetTempPath(),
              logger,
              cancellationToken);
-        return Path.Combine(Path.GetTempPath(), packageId, version.ToString());
+        var filepath = Path.Combine(Path.GetTempPath(), packageId, version.ToString());
+        Console.WriteLine($"Downloaded to {filepath}");
+        return filepath;
     }
 }

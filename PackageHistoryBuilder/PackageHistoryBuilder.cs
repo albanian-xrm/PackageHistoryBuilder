@@ -1,4 +1,5 @@
 ﻿using LibGit2Sharp;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ public class PackageHistoryBuilder
     public PackageHistoryBuilder(Options options)
     {
         this.options = options;
-       gitClient  = new GitClient(options.OutputPath);
+        gitClient = new GitClient(options.OutputPath);
     }
 
     public async Task Execute()
@@ -25,13 +26,26 @@ public class PackageHistoryBuilder
         {
             if (tags.Any((Tag tag) => tag.FriendlyName == version.ToString()))
             {
+                Console.WriteLine($"{version} not found in Repository");
                 continue;
             }
             string tempFolder = await nuGetClient.DownloadPackage(options.PackageId, version);
             var directory = new DirectoryInfo(tempFolder);
-            await iLSpyClient.DecompileAsync(directory.GetFiles($"*{options.Assembly }", SearchOption.AllDirectories).First().FullName, options.OutputPath);
-            gitClient.CommitChanges(version.ToString(), version.ToString());
-            directory.Delete(true);
+            var files = directory.GetFiles($"*{options.Assembly}", SearchOption.AllDirectories);
+            if (files.Any())
+            {
+                try
+                {
+                    await iLSpyClient.DecompileAsync(files.First().FullName, options.OutputPath);
+                    gitClient.CommitChanges(version.ToString(), version.ToString());
+                }
+                catch (BadImageFormatException) { }
+            }
+            try
+            {
+                directory.Delete(true);
+            }
+            catch (IOException) { }
         }
     }
 }
