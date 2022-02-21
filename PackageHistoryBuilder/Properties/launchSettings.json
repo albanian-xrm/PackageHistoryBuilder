@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "PackageHistoryBuilder": {
+      "commandName": "Project",
+      "commandLineArgs": "-p Microsoft.CrmSdk.CoreAssemblies -o TestRepository -a Microsoft.Xrm.Sdk.dll "
+    },
+    "NoParameters": {
+      "commandName": "Project"
+    }
+  }
+}
