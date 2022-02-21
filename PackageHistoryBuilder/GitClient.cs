@@ -22,6 +22,7 @@ internal class GitClient
             new FileInfo(GIT_IGNORE).CopyTo(Path.Combine(outputPath, GIT_IGNORE));
             CommitChanges("Added .gitignore");
         }
+        Console.WriteLine($"Initialized {outputPath}");
     }
 
     internal IEnumerable<Tag> GetRepositoryTags()
@@ -42,7 +43,7 @@ internal class GitClient
             Commands.Stage(repo, "*");
             if (!repo.RetrieveStatus().IsDirty)
             {
-                Console.WriteLine("Nothing to commit. " + message);
+                Console.WriteLine("Nothing to commit " + message);
                 return;
             }
             repo.Commit(message, committer, committer);
@@ -50,6 +51,7 @@ internal class GitClient
             {
                 repo.ApplyTag(tag);
             }
+            Console.WriteLine($"Commited {message}");
         }
     }
 }
